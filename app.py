@@ -1,11 +1,13 @@
 import calendar
 import datetime
 import random
+import os
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (LoginManager, UserMixin, login_user, login_required,
                          logout_user, current_user)
 
+# Inicializando o app Flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'minha_chave_super_secreta'  # Substitua por uma chave segura
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
@@ -28,6 +30,7 @@ class Participant(db.Model):
     name = db.Column(db.String(150), nullable=False)
     gender = db.Column(db.String(20), nullable=False)  # 'homem' ou 'mulher'
 
+# Carregamento do usuário
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
