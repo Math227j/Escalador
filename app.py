@@ -1,11 +1,11 @@
 import calendar
 import datetime
 import random
-import os
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (LoginManager, UserMixin, login_user, login_required,
                          logout_user, current_user)
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Inicializando o app Flask
 app = Flask(__name__)
@@ -22,7 +22,13 @@ login_manager.login_view = 'login'
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
+    password_hash = db.Column(db.String(150), nullable=False)  # Alteração: armazena hash da senha
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)  # Gera o hash da senha
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)  # Verifica se a senha informada bate com o hash
 
 # Modelo de participante para a escala
 class Participant(db.Model):
@@ -47,9 +53,9 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        # Validação simples (não use em produção; use hash de senha)
-        user = User.query.filter_by(username=username, password=password).first()
-        if user:
+        # Validação usando hash de senha
+        user = User.query.filter_by(username=username).first()
+        if user and user.check_password(password):
             login_user(user, remember=True)  # Sessão persistente
             return redirect(url_for('escala'))
         else:
@@ -65,7 +71,8 @@ def cadastro():
         if User.query.filter_by(username=username).first():
             flash("Usuário já existe. Tente outro nome.", "danger")
         else:
-            new_user = User(username=username, password=password)
+            new_user = User(username=username)
+            new_user.set_password(password)  # Define o hash da senha
             db.session.add(new_user)
             db.session.commit()
             flash("Cadastro realizado com sucesso. Faça login!", "success")
