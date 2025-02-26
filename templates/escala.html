@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escala de Trabalho</title>
+  <style>
+    body { background: #f0f4f8; font-family: Arial, sans-serif; padding: 20px; }
+    .container { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    h2 { text-align: center; }
+    pre { background: #f7f7f7; padding: 10px; border: 1px solid #ccc; border-radius: 4px; white-space: pre-wrap; }
+    .btn { display: inline-block; padding: 10px 20px; background: #4CAF50; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+    .btn:hover { background: #45a049; }
+    .nav { text-align: center; margin-top: 20px; }
+    .nav a { margin: 0 10px; text-decoration: none; color: #4CAF50; font-weight: bold; }
+    .error { color: red; text-align: center; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Escala para {{ month }}/{{ year }}</h2>
+    {% if formatted_schedule %}
+      <h3>Escala Gerada:</h3>
+      <pre id="scheduleText">{{ formatted_schedule }}</pre>
+      <button class="btn" onclick="copySchedule()">Copiar Escala</button>
+    {% else %}
+      <p class="error">Não foi possível gerar a escala. Verifique se há participantes suficientes.</p>
+    {% endif %}
+    <div class="nav">
+      <a href="{{ url_for('participants') }}">Gerenciar Participantes</a>
+      <a href="{{ url_for('logout') }}">Sair</a>
+    </div>
+  </div>
+  <script>
+    function copySchedule() {
+      var copyText = document.getElementById("scheduleText").innerText;
+      navigator.clipboard.writeText(copyText).then(function() {
+        alert("Escala copiada para a área de transferência!");
+      }, function(err) {
+        alert("Erro ao copiar: " + err);
+      });
+    }
+  </script>
+</body>
+</html>
